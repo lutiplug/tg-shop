@@ -3,13 +3,11 @@ tg.expand();
 
 // Список товаров
 const products = [
-    // Telegram Premium
     { id: 'prem_1', name: 'Premium 1 мес.', price: 75, type: 'premium' },
     { id: 'prem_3', name: 'Premium 3 мес.', price: 230, type: 'premium' },
     { id: 'prem_6', name: 'Premium 6 мес.', price: 320, type: 'premium' },
     { id: 'prem_12', name: 'Premium 12 мес.', price: 500, type: 'premium' },
 
-    // Telegram Stars
     { id: 'stars_50', name: '50 Stars', price: 18, type: 'stars' },
     { id: 'stars_100', name: '100 Stars', price: 35, type: 'stars' },
     { id: 'stars_250', name: '250 Stars', price: 87, type: 'stars' },
@@ -22,6 +20,9 @@ let cart = {};
 function renderProducts() {
     const premContainer = document.getElementById('premium-grid');
     const starsContainer = document.getElementById('stars-grid');
+    
+    premContainer.innerHTML = '';
+    starsContainer.innerHTML = '';
 
     products.forEach(p => {
         const card = document.createElement('div');
@@ -51,14 +52,52 @@ function addToCart(id) {
     updateCartUI();
 }
 
-// Обновление отображения корзины
+// Изменение количества (+1 / -1)
+function changeQty(id, delta) {
+    if (!cart[id]) return;
+    
+    cart[id].count += delta;
+    if (cart[id].count <= 0) {
+        delete cart[id];
+    }
+    updateCartUI();
+}
+
+// Обновление интерфейса корзины
 function updateCartUI() {
     let totalPrice = 0;
     let totalCount = 0;
+    
+    const cartSection = document.getElementById('cart-section');
+    const cartContainer = document.getElementById('cart-items-container');
+    cartContainer.innerHTML = '';
 
-    Object.values(cart).forEach(item => {
+    const items = Object.values(cart);
+
+    if (items.length > 0) {
+        cartSection.style.display = 'block';
+    } else {
+        cartSection.style.display = 'none';
+    }
+
+    items.forEach(item => {
         totalPrice += item.price * item.count;
         totalCount += item.count;
+
+        const row = document.createElement('div');
+        row.className = 'cart-item-row';
+        row.innerHTML = `
+            <div>
+                <strong>${item.name}</strong>
+                <div style="font-size:12px; color:var(--hint-color);">${item.price} ₽ × ${item.count} = ${item.price * item.count} ₽</div>
+            </div>
+            <div class="counter-control">
+                <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
+                <span>${item.count}</span>
+                <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+            </div>
+        `;
+        cartContainer.appendChild(row);
     });
 
     document.getElementById('total-price').innerText = `${totalPrice} ₽`;
