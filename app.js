@@ -3,15 +3,25 @@ tg.expand();
 
 // Список товаров
 const products = [
-    { id: 'prem_1', name: 'Premium 1 мес.', price: 75, type: 'premium' },
+    // Telegram Stars
+    { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
+    { id: 'stars_75', name: '75 Звёзд ⭐️', price: 27, type: 'stars' },
+    { id: 'stars_100', name: '100 Звёзд ⭐️', price: 35, type: 'stars' },
+    { id: 'stars_150', name: '150 Звёзд ⭐️', price: 52, type: 'stars' },
+    { id: 'stars_250', name: '250 Звёзд ⭐️', price: 87, type: 'stars' },
+    { id: 'stars_300', name: '300 Звёзд ⭐️', price: 104, type: 'stars' },
+    { id: 'stars_500', name: '500 Звёзд ⭐️', price: 165, type: 'stars' },
+
+    // Telegram Premium
+    { id: 'prem_1', name: 'Premium 1 мес. (с заходом)', price: 75, type: 'premium' },
     { id: 'prem_3', name: 'Premium 3 мес.', price: 230, type: 'premium' },
     { id: 'prem_6', name: 'Premium 6 мес.', price: 320, type: 'premium' },
     { id: 'prem_12', name: 'Premium 12 мес.', price: 500, type: 'premium' },
 
-    { id: 'stars_50', name: '50 Stars', price: 18, type: 'stars' },
-    { id: 'stars_100', name: '100 Stars', price: 35, type: 'stars' },
-    { id: 'stars_250', name: '250 Stars', price: 87, type: 'stars' },
-    { id: 'stars_500', name: '500 Stars', price: 165, type: 'stars' },
+    // Пополнение Steam ($)
+    { id: 'steam_1', name: 'Пополнение Steam $1', price: 21, type: 'steam' },
+    { id: 'steam_5', name: 'Пополнение Steam $5', price: 100, type: 'steam' },
+    { id: 'steam_10', name: 'Пополнение Steam $10', price: 190, type: 'steam' },
 ];
 
 let cart = {};
