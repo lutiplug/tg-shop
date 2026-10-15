@@ -1,5 +1,6 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
+tg.ready();
 
 const products = [
     // Telegram Stars
@@ -25,6 +26,13 @@ const products = [
 
 let cart = {};
 
+// Функция включения приятного виброотклика при кликах
+function triggerHaptic() {
+    if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+    }
+}
+
 function renderProducts() {
     const premContainer = document.getElementById('premium-grid');
     const starsContainer = document.getElementById('stars-grid');
@@ -40,7 +48,7 @@ function renderProducts() {
         card.innerHTML = `
             <div class="card-title">${p.name}</div>
             <div class="card-price">${p.price} ₽</div>
-            <button class="btn-add" onclick="addToCart('${p.id}')">Добавить</button>
+            <button class="btn-add" onclick="addToCart('${p.id}')">В корзину</button>
         `;
 
         if (p.type === 'premium') {
@@ -54,6 +62,7 @@ function renderProducts() {
 }
 
 function addToCart(id) {
+    triggerHaptic();
     if (cart[id]) {
         cart[id].count += 1;
     } else {
@@ -64,6 +73,7 @@ function addToCart(id) {
 }
 
 function changeQty(id, delta) {
+    triggerHaptic();
     if (!cart[id]) return;
     
     cart[id].count += delta;
@@ -97,12 +107,12 @@ function updateCartUI() {
         row.className = 'cart-item-row';
         row.innerHTML = `
             <div>
-                <strong>${item.name}</strong>
-                <div style="font-size:12px; color:var(--hint-color);">${item.price} ₽ × ${item.count} = ${item.price * item.count} ₽</div>
+                <strong style="font-size:13px;">${item.name}</strong>
+                <div style="font-size:11px; color:var(--hint-color);">${item.price} ₽ × ${item.count}</div>
             </div>
             <div class="counter-control">
                 <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
-                <span>${item.count}</span>
+                <span style="font-weight:700; font-size:13px;">${item.count}</span>
                 <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
             </div>
         `;
@@ -114,6 +124,7 @@ function updateCartUI() {
 }
 
 document.getElementById('checkoutBtn').addEventListener('click', () => {
+    triggerHaptic();
     const items = Object.values(cart);
     if (items.length === 0) {
         tg.showAlert("Ваша корзина пуста!");
