@@ -13,6 +13,7 @@
             --btn-color: #ffffff;
             --btn-text: #000000;
             --card-bg: #111111;
+            --border-color: #222222;
         }
 
         * {
@@ -32,7 +33,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .header h2 {
@@ -48,11 +49,64 @@
             color: var(--hint-color);
         }
 
+        /* Поле поиска */
+        .search-container {
+            margin-bottom: 14px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #111111;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--hint-color);
+        }
+
+        /* Вкладки категорий */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: #111111;
+            color: var(--hint-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
         .section-title {
             font-size: 16px;
             font-weight: 700;
-            margin: 24px 0 12px;
-            border-bottom: 1px solid #222222;
+            margin: 20px 0 12px;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
             letter-spacing: 0.3px;
         }
@@ -65,7 +119,7 @@
 
         .card {
             background: var(--card-bg);
-            border: 1px solid #222222;
+            border: 1px solid var(--border-color);
             border-radius: 14px;
             padding: 14px;
             text-align: center;
@@ -116,7 +170,7 @@
             background: var(--card-bg);
             border-radius: 14px;
             padding: 16px;
-            border: 1px solid #222222;
+            border: 1px solid var(--border-color);
         }
 
         .cart-item-row {
@@ -124,7 +178,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #222222;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .cart-item-row:last-child {
@@ -138,7 +192,7 @@
             background: #000000;
             padding: 4px 8px;
             border-radius: 8px;
-            border: 1px solid #222222;
+            border: 1px solid var(--border-color);
         }
 
         .btn-qty {
@@ -156,7 +210,6 @@
             cursor: pointer;
         }
 
-        /* Плавающая панель снизу */
         .cart-bar {
             position: fixed;
             bottom: 16px;
@@ -189,6 +242,13 @@
             transform: scale(0.95);
             opacity: 0.9;
         }
+
+        .empty-search {
+            text-align: center;
+            color: var(--hint-color);
+            padding: 20px 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -198,15 +258,38 @@
         <p>Магазин цифровых товаров</p>
     </div>
 
-    <div class="section-title">👑 Telegram Premium</div>
-    <div class="grid" id="premium-grid"></div>
+    <!-- Строка поиска -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="handleSearch()">
+    </div>
 
-    <div class="section-title">⭐️ Telegram Stars</div>
-    <div class="grid" id="stars-grid"></div>
+    <!-- Вкладки категорий -->
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="filterCategory('all', this)">Все товары</button>
+        <button class="tab-btn" onclick="filterCategory('premium', this)">👑 Premium</button>
+        <button class="tab-btn" onclick="filterCategory('stars', this)">⭐️ Stars</button>
+        <button class="tab-btn" onclick="filterCategory('steam', this)">🎮 Steam</button>
+    </div>
 
-    <div class="section-title">🎮 Пополнение Steam</div>
-    <div class="grid" id="steam-grid"></div>
+    <!-- Контейнеры товаров -->
+    <div id="premium-section">
+        <div class="section-title">👑 Telegram Premium</div>
+        <div class="grid" id="premium-grid"></div>
+    </div>
 
+    <div id="stars-section">
+        <div class="section-title">⭐️ Telegram Stars</div>
+        <div class="grid" id="stars-grid"></div>
+    </div>
+
+    <div id="steam-section">
+        <div class="section-title">🎮 Пополнение Steam</div>
+        <div class="grid" id="steam-grid"></div>
+    </div>
+
+    <div id="no-results" class="empty-search" style="display: none;">Товары не найдены 🔍</div>
+
+    <!-- Корзина -->
     <div id="cart-section" class="cart-items-list" style="display:none;">
         <div style="font-size: 15px; font-weight:700; margin-bottom: 10px;">🛒 Выбранные товары:</div>
         <div id="cart-items-container"></div>
