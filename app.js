@@ -26,7 +26,6 @@ const products = [
 
 let cart = {};
 
-// Функция включения приятного виброотклика при кликах
 function triggerHaptic() {
     if (tg.HapticFeedback) {
         tg.HapticFeedback.impactOccurred('light');
