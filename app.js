@@ -1,7 +1,6 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-// Список товаров
 const products = [
     // Telegram Stars
     { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
@@ -26,13 +25,14 @@ const products = [
 
 let cart = {};
 
-// Рендеринг карточек
 function renderProducts() {
     const premContainer = document.getElementById('premium-grid');
     const starsContainer = document.getElementById('stars-grid');
+    const steamContainer = document.getElementById('steam-grid');
     
     premContainer.innerHTML = '';
     starsContainer.innerHTML = '';
+    steamContainer.innerHTML = '';
 
     products.forEach(p => {
         const card = document.createElement('div');
@@ -45,13 +45,14 @@ function renderProducts() {
 
         if (p.type === 'premium') {
             premContainer.appendChild(card);
-        } else {
+        } else if (p.type === 'stars') {
             starsContainer.appendChild(card);
+        } else if (p.type === 'steam') {
+            steamContainer.appendChild(card);
         }
     });
 }
 
-// Добавление в корзину
 function addToCart(id) {
     if (cart[id]) {
         cart[id].count += 1;
@@ -62,7 +63,6 @@ function addToCart(id) {
     updateCartUI();
 }
 
-// Изменение количества (+1 / -1)
 function changeQty(id, delta) {
     if (!cart[id]) return;
     
@@ -73,7 +73,6 @@ function changeQty(id, delta) {
     updateCartUI();
 }
 
-// Обновление интерфейса корзины
 function updateCartUI() {
     let totalPrice = 0;
     let totalCount = 0;
@@ -114,7 +113,6 @@ function updateCartUI() {
     document.getElementById('total-count').innerText = `Товаров: ${totalCount}`;
 }
 
-// Отправка заказа в бот
 document.getElementById('checkoutBtn').addEventListener('click', () => {
     const items = Object.values(cart);
     if (items.length === 0) {
