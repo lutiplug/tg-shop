@@ -25,6 +25,7 @@ const products = [
 ];
 
 let cart = {};
+let currentCategory = 'all';
 
 function triggerHaptic() {
     if (tg.HapticFeedback) {
@@ -32,32 +33,82 @@ function triggerHaptic() {
     }
 }
 
+// Фильтрация по категориям (вкладкам)
+function filterCategory(category, btnElement) {
+    triggerHaptic();
+    currentCategory = category;
+
+    // Переключение активности вкладок
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (btnElement) {
+        btnElement.classList.add('active');
+    }
+
+    renderProducts();
+}
+
+// Поиск по названию
+function handleSearch() {
+    renderProducts();
+}
+
 function renderProducts() {
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+
     const premContainer = document.getElementById('premium-grid');
     const starsContainer = document.getElementById('stars-grid');
     const steamContainer = document.getElementById('steam-grid');
-    
+
+    const premSection = document.getElementById('premium-section');
+    const starsSection = document.getElementById('stars-section');
+    const steamSection = document.getElementById('steam-section');
+    const noResults = document.getElementById('no-results');
+
     premContainer.innerHTML = '';
     starsContainer.innerHTML = '';
     steamContainer.innerHTML = '';
 
-    products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <div class="card-title">${p.name}</div>
-            <div class="card-price">${p.price} ₽</div>
-            <button class="btn-add" onclick="addToCart('${p.id}')">В корзину</button>
-        `;
+    let premCount = 0;
+    let starsCount = 0;
+    let steamCount = 0;
 
-        if (p.type === 'premium') {
-            premContainer.appendChild(card);
-        } else if (p.type === 'stars') {
-            starsContainer.appendChild(card);
-        } else if (p.type === 'steam') {
-            steamContainer.appendChild(card);
+    products.forEach(p => {
+        const matchesCategory = (currentCategory === 'all' || p.type === currentCategory);
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery);
+
+        if (matchesCategory && matchesSearch) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-title">${p.name}</div>
+                <div class="card-price">${p.price} ₽</div>
+                <button class="btn-add" onclick="addToCart('${p.id}')">В корзину</button>
+            `;
+
+            if (p.type === 'premium') {
+                premContainer.appendChild(card);
+                premCount++;
+            } else if (p.type === 'stars') {
+                starsContainer.appendChild(card);
+                starsCount++;
+            } else if (p.type === 'steam') {
+                steamContainer.appendChild(card);
+                steamCount++;
+            }
         }
     });
+
+    // Показываем/скрываем секции
+    premSection.style.display = premCount > 0 ? 'block' : 'none';
+    starsSection.style.display = starsCount > 0 ? 'block' : 'none';
+    steamSection.style.display = steamCount > 0 ? 'block' : 'none';
+
+    // Показываем плашку, если ничего не найдено
+    if (premCount === 0 && starsCount === 0 && steamCount === 0) {
+        noResults.style.display = 'block';
+    } else {
+        noResults.style.display = 'none';
+    }
 }
 
 function addToCart(id) {
@@ -74,7 +125,7 @@ function addToCart(id) {
 function changeQty(id, delta) {
     triggerHaptic();
     if (!cart[id]) return;
-    
+
     cart[id].count += delta;
     if (cart[id].count <= 0) {
         delete cart[id];
@@ -85,7 +136,7 @@ function changeQty(id, delta) {
 function updateCartUI() {
     let totalPrice = 0;
     let totalCount = 0;
-    
+
     const cartSection = document.getElementById('cart-section');
     const cartContainer = document.getElementById('cart-items-container');
     cartContainer.innerHTML = '';
