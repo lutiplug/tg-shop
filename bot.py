@@ -2,17 +2,33 @@ import asyncio
 import logging
 import json
 import random
+import os
+from aiohttp import web
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 TOKEN = "8791410538:AAEaGwZSR6O6mzoPxglRXF4vcECHTn4EcXY"
-ADMIN_ID = 8601986783  # Ваш ID
+ADMIN_ID = 6592791153  # Ваш ID
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+# Веб-сервер с динамическим портом для бесплатного тарифа Render
+async def handle_ping(request):
+    return web.Response(text="Bot is alive!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
@@ -38,11 +54,11 @@ async def handle_web_app_data(message: types.Message):
 
         user = message.from_user
         user_info = f"@{user.username}" if user.username else f"{user.first_name}"
-        order_id = random.randint(1000, 9999)  # Генерируем короткий номер заказа
+        order_id = random.randint(1000, 9999)  # Номер заказа
 
         order_details = "\n".join([f"• {item['name']} x{item['count']} — {item['price'] * item['count']} ₽" for item in items])
 
-        # 1. Отправляем уведомление администратору с кнопками управления
+        # Кнопки для администратора
         builder = InlineKeyboardBuilder()
         builder.row(
             types.InlineKeyboardButton(text="✅ Выполнен", callback_data=f"status_done_{user.id}_{order_id}"),
@@ -51,6 +67,7 @@ async def handle_web_app_data(message: types.Message):
         if user.username:
             builder.row(types.InlineKeyboardButton(text="💬 Написать клиенту", url=f"https://t.me/{user.username}"))
 
+        # 1. Уведомление администратору
         admin_message = (
             f"🚨 **Новый заказ #{order_id}!**\n\n"
             f"👤 **Покупатель:** {user_info}\n"
@@ -76,16 +93,14 @@ async def handle_web_app_data(message: types.Message):
     except Exception as e:
         logging.error(f"Ошибка обработки заказа: {e}")
 
-# Обработка нажатия кнопки "Выполнен"
+# Обработка кнопки "Выполнен"
 @dp.callback_query(F.data.startswith("status_done_"))
 async def order_done(callback: types.CallbackQuery):
     _, _, user_id, order_id = callback.data.split("_")
     
-    # Обновляем текст чека у админа
     updated_text = callback.message.text.replace("📌 Статус: ⏳ В обработке", "📌 Статус: ✅ Выполнен")
     await callback.message.edit_text(updated_text)
 
-    # Оповещаем клиента
     try:
         await bot.send_message(
             chat_id=int(user_id),
@@ -96,16 +111,14 @@ async def order_done(callback: types.CallbackQuery):
     
     await callback.answer("Заказ помечен как выполнен!")
 
-# Обработка нажатия кнопки "Отменен"
+# Обработка кнопки "Отменен"
 @dp.callback_query(F.data.startswith("status_cancel_"))
 async def order_cancel(callback: types.CallbackQuery):
     _, _, user_id, order_id = callback.data.split("_")
     
-    # Обновляем текст чека у админа
     updated_text = callback.message.text.replace("📌 Статус: ⏳ В обработке", "📌 Статус: ❌ Отменен")
     await callback.message.edit_text(updated_text)
 
-    # Оповещаем клиента
     try:
         await bot.send_message(
             chat_id=int(user_id),
@@ -117,8 +130,11 @@ async def order_cancel(callback: types.CallbackQuery):
     await callback.answer("Заказ отменен!")
 
 async def main():
+    # Запускаем локальный веб-сервер для Render и поллинг бота
+    await start_web_server()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
