@@ -2,6 +2,33 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
+// ==========================================
+// ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (ДЕНЬ / НОЧЬ)
+// ==========================================
+function applyTheme(isLight) {
+    if (isLight) {
+        document.body.classList.add('light-theme');
+        if (tg.setHeaderColor) tg.setHeaderColor('#ffffff');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#ffffff');
+    } else {
+        document.body.classList.remove('light-theme');
+        if (tg.setHeaderColor) tg.setHeaderColor('#000000');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#000000');
+    }
+}
+
+function toggleTheme() {
+    triggerHaptic();
+    const isLight = !document.body.classList.contains('light-theme');
+    applyTheme(isLight);
+    localStorage.setItem('onemarket_theme', isLight ? 'light' : 'dark');
+}
+
+// Загружаем сохраненную тему при запуске
+const savedTheme = localStorage.getItem('onemarket_theme');
+applyTheme(savedTheme === 'light');
+
+
 const products = [
     // Telegram Stars
     { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
@@ -38,7 +65,6 @@ function filterCategory(category, btnElement) {
     triggerHaptic();
     currentCategory = category;
 
-    // Переключение активности вкладок
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     if (btnElement) {
         btnElement.classList.add('active');
@@ -98,12 +124,10 @@ function renderProducts() {
         }
     });
 
-    // Показываем/скрываем секции
     premSection.style.display = premCount > 0 ? 'block' : 'none';
     starsSection.style.display = starsCount > 0 ? 'block' : 'none';
     steamSection.style.display = steamCount > 0 ? 'block' : 'none';
 
-    // Показываем плашку, если ничего не найдено
     if (premCount === 0 && starsCount === 0 && steamCount === 0) {
         noResults.style.display = 'block';
     } else {
@@ -195,21 +219,18 @@ document.getElementById('checkoutBtn').addEventListener('click', () => {
 // СКРИМЕР КОНЯ ДЛЯ MINI APP
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Создаем кнопку "Скидка" прямо под шапкой
     const header = document.querySelector('.header');
     const screamerBtn = document.createElement('button');
     screamerBtn.innerHTML = "🎁 Получить секретную скидку";
     screamerBtn.className = "btn-add";
-    screamerBtn.style.cssText = "width: 100%; margin-top: 10px; background: #222; color: #fff; border: 1px solid #444;";
+    screamerBtn.style.cssText = "width: 100%; margin-top: 10px;";
     header.appendChild(screamerBtn);
 
-    // 2. Создаем аудиоэлемент со звуком
     const audio = document.createElement('audio');
     audio.id = "horseAudio";
     audio.src = "mixkit-scared-horse-neighing-85.wav";
     document.body.appendChild(audio);
 
-    // 3. Создаем модальное окно для картинки-скримера
     const modal = document.createElement('div');
     modal.id = "screamerModal";
     modal.style.cssText = "display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;";
@@ -218,25 +239,22 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(modal);
 
-    // 4. Событие при клике на кнопку
     screamerBtn.addEventListener('click', () => {
         triggerHaptic();
         modal.style.display = 'flex';
         
-        // Включаем звук
         audio.currentTime = 0;
         audio.play().catch(err => console.log("Автозапуск звука заблокирован:", err));
 
-        // Закрываем скример через 3.5 секунды по клику или таймеру
         setTimeout(() => {
             modal.style.display = 'none';
         }, 3500);
     });
 
-    // Закрыть по клику на саму картинку
     modal.addEventListener('click', () => {
         modal.style.display = 'none';
     });
 });
 
 renderProducts();
+
