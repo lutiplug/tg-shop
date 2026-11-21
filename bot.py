@@ -32,7 +32,8 @@ async def start_web_server():
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
-    kb = types.ReplyKeyboardMarkup(
+    # Обычная клавиатура с магазином снизу
+    reply_kb = types.ReplyKeyboardMarkup(
         keyboard=[
             [
                 types.KeyboardButton(
@@ -43,7 +44,47 @@ async def cmd_start(message: types.Message):
         ],
         resize_keyboard=True
     )
-    await message.answer("Добро пожаловать в OneMarket! Нажмите кнопку ниже для покупок:", reply_markup=kb)
+    
+    # Инлайн-кнопка со скидкой (скримером) под сообщением
+    inline_kb = InlineKeyboardBuilder()
+    inline_kb.button(text="🎁 Скидка", callback_data="screamer_btn")
+
+    # Название магазина со звездой и инлайн-кнопкой
+    text = "Магазин О<tg-emoji emoji-id='5368324170671202286'>⭐</tg-emoji>\n\nДобро пожаловать в OneMarket! Выберите нужный раздел ниже:"
+
+    await message.answer(
+        text, 
+        parse_mode="HTML", 
+        reply_markup=reply_kb
+    )
+    # Отправляем сообщение с инлайн-кнопкой скримера
+    await message.answer(
+        "А здесь можно попытать удачу 👇", 
+        reply_markup=inline_kb.as_markup()
+    )
+
+# Обработчик нажатия на инлайн-кнопку скримера (на aiogram)
+@dp.callback_query(F.data == "screamer_btn")
+async def send_horse_screamer(callback: types.CallbackQuery):
+    chat_id = callback.message.chat.id
+
+    try:
+        # Отправляем картинку из репозитория
+        photo_file = types.FSInputFile("IMAGE 2026-11-21 23:09:51.jpg")
+        await bot.send_photo(chat_id, photo=photo_file)
+
+        # Отправляем звук со ржанием из репозитория
+        audio_file = types.FSInputFile("mixkit-scared-horse-neighing-85.wav")
+        await bot.send_audio(chat_id, audio=audio_file)
+
+    except Exception as e:
+        logging.error(f"Ошибка отправки медиафайлов: {e}")
+        await bot.send_message(
+            chat_id,
+            "⚠️ Ошибка: медиафайлы не найдены в репозитории!"
+        )
+
+    await callback.answer()
 
 @dp.message(F.web_app_data)
 async def handle_web_app_data(message: types.Message):
@@ -54,11 +95,10 @@ async def handle_web_app_data(message: types.Message):
 
         user = message.from_user
         user_info = f"@{user.username}" if user.username else f"{user.first_name}"
-        order_id = random.randint(1000, 9999)  # Номер заказа
+        order_id = random.randint(1000, 9999)
 
         order_details = "\n".join([f"• {item['name']} x{item['count']} — {item['price'] * item['count']} ₽" for item in items])
 
-        # Кнопки для администратора
         builder = InlineKeyboardBuilder()
         builder.row(
             types.InlineKeyboardButton(text="✅ Выполнен", callback_data=f"status_done_{user.id}_{order_id}"),
@@ -67,7 +107,6 @@ async def handle_web_app_data(message: types.Message):
         if user.username:
             builder.row(types.InlineKeyboardButton(text="💬 Написать клиенту", url=f"https://t.me/{user.username}"))
 
-        # 1. Уведомление администратору
         admin_message = (
             f"🚨 **Новый заказ #{order_id}!**\n\n"
             f"👤 **Покупатель:** {user_info}\n"
@@ -78,7 +117,6 @@ async def handle_web_app_data(message: types.Message):
         )
         await bot.send_message(chat_id=ADMIN_ID, text=admin_message, reply_markup=builder.as_markup(), parse_mode="Markdown")
 
-        # 2. Подтверждение клиенту
         try:
             await message.answer(
                 f"✅ **Заказ #{order_id} оформлен!**\n\n"
@@ -93,7 +131,6 @@ async def handle_web_app_data(message: types.Message):
     except Exception as e:
         logging.error(f"Ошибка обработки заказа: {e}")
 
-# Обработка кнопки "Выполнен"
 @dp.callback_query(F.data.startswith("status_done_"))
 async def order_done(callback: types.CallbackQuery):
     _, _, user_id, order_id = callback.data.split("_")
@@ -111,7 +148,6 @@ async def order_done(callback: types.CallbackQuery):
     
     await callback.answer("Заказ помечен как выполнен!")
 
-# Обработка кнопки "Отменен"
 @dp.callback_query(F.data.startswith("status_cancel_"))
 async def order_cancel(callback: types.CallbackQuery):
     _, _, user_id, order_id = callback.data.split("_")
@@ -130,28 +166,12 @@ async def order_cancel(callback: types.CallbackQuery):
     await callback.answer("Заказ отменен!")
 
 async def main():
-    # Запускаем локальный веб-сервер для Render и поллинг бота
     await start_web_server()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-@bot.callback_query_handler(func=lambda call: call.data == "screamer_btn")
-def send_horse_screamer(call):
-  chat_id = call.message.chat.id
 
-  try:
-    # Используем точные имена файлов из вашего репозитория на GitHub
-    with open("IMAGE 2026-11-21 23:09:51.jpg", "rb") as photo:
-      bot.send_photo(chat_id, photo)
-
-    with open("mixkit-scared-horse-neighing-85.wav", "rb") as audio:
-      bot.send_audio(chat_id, audio)
-
-  except FileNotFoundError:
-    bot.send_message(
-        chat_id,
-        "⚠️ Ошибка: медиафайлы не найдены в репозитории!",
-    )
-
+if __name__ == "__main__":
+    asyncio.run(main())
   bot.answer_callback_query(call.id)if __name__ == "__main__":
     asyncio.run(main())
     
