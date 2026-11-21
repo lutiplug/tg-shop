@@ -134,7 +134,24 @@ async def main():
     await start_web_server()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+@bot.callback_query_handler(func=lambda call: call.data == "screamer_btn")
+def send_horse_screamer(call):
+  chat_id = call.message.chat.id
 
-if __name__ == "__main__":
+  try:
+    # Используем точные имена файлов из вашего репозитория на GitHub
+    with open("IMAGE 2026-11-21 23:09:51.jpg", "rb") as photo:
+      bot.send_photo(chat_id, photo)
+
+    with open("mixkit-scared-horse-neighing-85.wav", "rb") as audio:
+      bot.send_audio(chat_id, audio)
+
+  except FileNotFoundError:
+    bot.send_message(
+        chat_id,
+        "⚠️ Ошибка: медиафайлы не найдены в репозитории!",
+    )
+
+  bot.answer_callback_query(call.id)if __name__ == "__main__":
     asyncio.run(main())
     
