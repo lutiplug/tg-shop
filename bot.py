@@ -172,6 +172,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-  bot.answer_callback_query(call.id)if __name__ == "__main__":
-    asyncio.run(main())
-    
