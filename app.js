@@ -3,7 +3,7 @@ tg.expand();
 tg.ready();
 
 // ==========================================
-// ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (ДЕНЬ / НОЧЬ)
+// 1. ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (ДЕНЬ / НОЧЬ)
 // ==========================================
 function applyTheme(isLight) {
     if (isLight) {
@@ -24,13 +24,14 @@ function toggleTheme() {
     localStorage.setItem('onemarket_theme', isLight ? 'light' : 'dark');
 }
 
-// Загружаем сохраненную тему при запуске
 const savedTheme = localStorage.getItem('onemarket_theme');
 applyTheme(savedTheme === 'light');
 
 
+// ==========================================
+// 2. ДАННЫЕ И КАТАЛОГ МАГАЗИНА
+// ==========================================
 const products = [
-    // Telegram Stars
     { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
     { id: 'stars_75', name: '75 Звёзд ⭐️', price: 27, type: 'stars' },
     { id: 'stars_100', name: '100 Звёзд ⭐️', price: 35, type: 'stars' },
@@ -39,13 +40,11 @@ const products = [
     { id: 'stars_300', name: '300 Звёзд ⭐️', price: 104, type: 'stars' },
     { id: 'stars_500', name: '500 Звёзд ⭐️', price: 165, type: 'stars' },
 
-    // Telegram Premium
     { id: 'prem_1', name: 'Premium 1 мес. (с заходом)', price: 75, type: 'premium' },
     { id: 'prem_3', name: 'Premium 3 мес.', price: 230, type: 'premium' },
     { id: 'prem_6', name: 'Premium 6 мес.', price: 320, type: 'premium' },
     { id: 'prem_12', name: 'Premium 12 мес.', price: 500, type: 'premium' },
 
-    // Пополнение Steam ($)
     { id: 'steam_1', name: 'Пополнение Steam $1', price: 21, type: 'steam' },
     { id: 'steam_5', name: 'Пополнение Steam $5', price: 100, type: 'steam' },
     { id: 'steam_10', name: 'Пополнение Steam $10', price: 190, type: 'steam' },
@@ -60,20 +59,14 @@ function triggerHaptic() {
     }
 }
 
-// Фильтрация по категориям (вкладкам)
 function filterCategory(category, btnElement) {
     triggerHaptic();
     currentCategory = category;
-
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (btnElement) {
-        btnElement.classList.add('active');
-    }
-
+    if (btnElement) btnElement.classList.add('active');
     renderProducts();
 }
 
-// Поиск по названию
 function handleSearch() {
     renderProducts();
 }
@@ -90,13 +83,13 @@ function renderProducts() {
     const steamSection = document.getElementById('steam-section');
     const noResults = document.getElementById('no-results');
 
+    if (!premContainer) return;
+
     premContainer.innerHTML = '';
     starsContainer.innerHTML = '';
     steamContainer.innerHTML = '';
 
-    let premCount = 0;
-    let starsCount = 0;
-    let steamCount = 0;
+    let premCount = 0, starsCount = 0, steamCount = 0;
 
     products.forEach(p => {
         const matchesCategory = (currentCategory === 'all' || p.type === currentCategory);
@@ -111,28 +104,16 @@ function renderProducts() {
                 <button class="btn-add" onclick="addToCart('${p.id}')">В корзину</button>
             `;
 
-            if (p.type === 'premium') {
-                premContainer.appendChild(card);
-                premCount++;
-            } else if (p.type === 'stars') {
-                starsContainer.appendChild(card);
-                starsCount++;
-            } else if (p.type === 'steam') {
-                steamContainer.appendChild(card);
-                steamCount++;
-            }
+            if (p.type === 'premium') { premContainer.appendChild(card); premCount++; }
+            else if (p.type === 'stars') { starsContainer.appendChild(card); starsCount++; }
+            else if (p.type === 'steam') { steamContainer.appendChild(card); steamCount++; }
         }
     });
 
     premSection.style.display = premCount > 0 ? 'block' : 'none';
     starsSection.style.display = starsCount > 0 ? 'block' : 'none';
     steamSection.style.display = steamCount > 0 ? 'block' : 'none';
-
-    if (premCount === 0 && starsCount === 0 && steamCount === 0) {
-        noResults.style.display = 'block';
-    } else {
-        noResults.style.display = 'none';
-    }
+    noResults.style.display = (premCount === 0 && starsCount === 0 && steamCount === 0) ? 'block' : 'none';
 }
 
 function addToCart(id) {
@@ -149,29 +130,21 @@ function addToCart(id) {
 function changeQty(id, delta) {
     triggerHaptic();
     if (!cart[id]) return;
-
     cart[id].count += delta;
-    if (cart[id].count <= 0) {
-        delete cart[id];
-    }
+    if (cart[id].count <= 0) delete cart[id];
     updateCartUI();
 }
 
 function updateCartUI() {
-    let totalPrice = 0;
-    let totalCount = 0;
-
+    let totalPrice = 0, totalCount = 0;
     const cartSection = document.getElementById('cart-section');
     const cartContainer = document.getElementById('cart-items-container');
-    cartContainer.innerHTML = '';
+    if (!cartContainer) return;
 
+    cartContainer.innerHTML = '';
     const items = Object.values(cart);
 
-    if (items.length > 0) {
-        cartSection.style.display = 'block';
-    } else {
-        cartSection.style.display = 'none';
-    }
+    cartSection.style.display = items.length > 0 ? 'block' : 'none';
 
     items.forEach(item => {
         totalPrice += item.price * item.count;
@@ -197,64 +170,87 @@ function updateCartUI() {
     document.getElementById('total-count').innerText = `Товаров: ${totalCount}`;
 }
 
-document.getElementById('checkoutBtn').addEventListener('click', () => {
-    triggerHaptic();
-    const items = Object.values(cart);
-    if (items.length === 0) {
-        tg.showAlert("Ваша корзина пуста!");
-        return;
-    }
-
-    let totalPrice = items.reduce((sum, item) => sum + item.price * item.count, 0);
-
-    const orderData = {
-        items: items.map(i => ({ name: i.name, count: i.count, price: i.price })),
-        totalPrice: totalPrice
-    };
-
-    tg.sendData(JSON.stringify(orderData));
-});
-
-// ==========================================
-// СКРИМЕР КОНЯ ДЛЯ MINI APP
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-    const header = document.querySelector('.header');
-    const screamerBtn = document.createElement('button');
-    screamerBtn.innerHTML = "🎁 Получить секретную скидку";
-    screamerBtn.className = "btn-add";
-    screamerBtn.style.cssText = "width: 100%; margin-top: 10px;";
-    header.appendChild(screamerBtn);
-
-    const audio = document.createElement('audio');
-    audio.id = "horseAudio";
-    audio.src = "mixkit-scared-horse-neighing-85.wav";
-    document.body.appendChild(audio);
-
-    const modal = document.createElement('div');
-    modal.id = "screamerModal";
-    modal.style.cssText = "display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;";
-    modal.innerHTML = `
-        <img src="IMAGE 2026-11-21 23:09:51.jpg" style="max-width: 90%; max-height: 90%; border-radius: 12px;">
-    `;
-    document.body.appendChild(modal);
-
-    screamerBtn.addEventListener('click', () => {
+const checkoutBtn = document.getElementById('checkoutBtn');
+if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
         triggerHaptic();
-        modal.style.display = 'flex';
-        
-        audio.currentTime = 0;
-        audio.play().catch(err => console.log("Автозапуск звука заблокирован:", err));
-
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 3500);
+        const items = Object.values(cart);
+        if (items.length === 0) {
+            tg.showAlert("Ваша корзина пуста!");
+            return;
+        }
+        let totalPrice = items.reduce((sum, item) => sum + item.price * item.count, 0);
+        tg.sendData(JSON.stringify({
+            items: items.map(i => ({ name: i.name, count: i.count, price: i.price })),
+            totalPrice: totalPrice
+        }));
     });
+}
 
-    modal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-});
 
-renderProducts();
+// ==========================================
+// 3. НИЖНЯЯ НАВИГАЦИЯ (МАГАЗИН / ИГРЫ / ЛУДКА)
+// ==========================================
+function switchTab(tabName, btnElement) {
+    triggerHaptic();
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
 
+    const shopContent = document.getElementById('shop-content');
+    const gamesContent = document.getElementById('games-content');
+    const rouletteContent = document.getElementById('roulette-content');
+
+    if (shopContent) shopContent.style.display = 'none';
+    if (gamesContent) { gamesContent.style.display = 'none'; stopFlappyBird(); }
+    if (rouletteContent) rouletteContent.style.display = 'none';
+
+    if (tabName === 'shop') {
+        if (shopContent) shopContent.style.display = 'block';
+        renderProducts();
+    } else if (tabName === 'games') {
+        if (gamesContent) {
+            gamesContent.style.display = 'block';
+            startFlappyBird();
+        }
+    } else if (tabName === 'roulette') {
+        if (rouletteContent) rouletteContent.style.display = 'block';
+    }
+}
+
+
+// ==========================================
+// 4. ИГРА FLAPPY BIRD
+// ==========================================
+let fbInterval = null;
+let bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
+let pipes = [];
+let score = 0;
+let isGameOver = false;
+
+function startFlappyBird() {
+    const container = document.getElementById('games-content');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="text-align: center; padding-top: 10px;">
+            <h3 style="margin: 0 0 10px 0;">🎮 Flappy Bird</h3>
+            <p style="font-size: 12px; color: var(--hint-color); margin-bottom: 15px;">Тапай по экрану, чтобы лететь!</p>
+            <div style="position: relative; width: 300px; height: 400px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 2px solid var(--border-color); background: #1a1a1a;">
+                <canvas id="flappyCanvas" width="300" height="400" style="display: block; cursor: pointer;"></canvas>
+                <div id="fbScore" style="position: absolute; top: 15px; left: 0; right: 0; font-size: 28px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">0</div>
+            </div>
+        </div>
+    `;
+
+    const canvas = document.getElementById('flappyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
+    pipes = [];
+    score = 0;
+    isGameOver = false;
+
+    function addPipe() {
+        let gap = 120;
+        let topHeight = Math.floor(Math.random() * (canvas.height - gap - 120)) + 40;
+        pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap, width: 50
