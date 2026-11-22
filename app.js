@@ -2,9 +2,7 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// ==========================================
-// 1. ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (ДЕНЬ / НОЧЬ)
-// ==========================================
+// 1. ТЕМА
 function applyTheme(isLight) {
     if (isLight) {
         document.body.classList.add('light-theme');
@@ -28,9 +26,7 @@ const savedTheme = localStorage.getItem('onemarket_theme');
 applyTheme(savedTheme === 'light');
 
 
-// ==========================================
 // 2. ДАННЫЕ И КАТАЛОГ МАГАЗИНА
-// ==========================================
 const products = [
     { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
     { id: 'stars_75', name: '75 Звёзд ⭐️', price: 27, type: 'stars' },
@@ -188,161 +184,7 @@ if (checkoutBtn) {
 }
 
 
-// ==========================================
-// 3. НИЖНЯЯ НАВИГАЦИЯ (МАГАЗИН / ИГРЫ / ЛУДКА)
-// ==========================================
-function switchTab(tabName, btnElement) {
-    triggerHaptic();
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    if (btnElement) btnElement.classList.add('active');
-
-    const shopContent = document.getElementById('shop-content');
-    const gamesContent = document.getElementById('games-content');
-    const rouletteContent = document.getElementById('roulette-content');
-
-    if (shopContent) shopContent.style.display = 'none';
-    if (gamesContent) { gamesContent.style.display = 'none'; stopFlappyBird(); }
-    if (rouletteContent) rouletteContent.style.display = 'none';
-
-    if (tabName === 'shop') {
-        if (shopContent) shopContent.style.display = 'block';
-        renderProducts();
-    } else if (tabName === 'games') {
-        if (gamesContent) {
-            gamesContent.style.display = 'block';
-            startFlappyBird();
-        }
-    } else if (tabName === 'roulette') {
-        if (rouletteContent) rouletteContent.style.display = 'block';
-    }
-}
-
-
-// ==========================================
-// 4. ИГРА FLAPPY BIRD
-// ==========================================
-let fbInterval = null;
-let bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
-let pipes = [];
-let score = 0;
-let isGameOver = false;
-
-function startFlappyBird() {
-    const container = document.getElementById('games-content');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div style="text-align: center; padding-top: 10px;">
-            <h3 style="margin: 0 0 10px 0;">🎮 Flappy Bird</h3>
-            <p style="font-size: 12px; color: var(--hint-color); margin-bottom: 15px;">Тапай по экрану, чтобы лететь!</p>
-            <div style="position: relative; width: 300px; height: 400px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 2px solid var(--border-color); background: #1a1a1a;">
-                <canvas id="flappyCanvas" width="300" height="400" style="display: block; cursor: pointer;"></canvas>
-                <div id="fbScore" style="position: absolute; top: 15px; left: 0; right: 0; font-size: 28px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">0</div>
-            </div>
-        </div>
-    `;
-
-    const canvas = document.getElementById('flappyCanvas');
-    const ctx = canvas.getContext('2d');
-
-    bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
-    pipes = [];
-    score = 0;
-    isGameOver = false;
-
-    function addPipe() {
-        let gap = 120;
-        let topHeight = Math.floor(Math.random() * (canvas.height - gap - 120)) + 40;
-        pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap, width: 50, passed: false });
-    }
-
-    canvas.addEventListener('click', () => {
-        triggerHaptic();
-        if (isGameOver) {
-            bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
-            pipes = [];
-            score = 0;
-            isGameOver = false;
-        } else {
-            bird.velocity = bird.lift;
-        }
-    });
-
-    let frameCount = 0;
-    fbInterval = setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        bird.velocity += bird.gravity;
-        bird.y += bird.velocity;
-
-        ctx.fillStyle = '#facc15';
-        ctx.beginPath();
-        ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        if (frameCount % 90 === 0) {
-            addPipe();
-        }
-
-        ctx.fillStyle = '#22c55e';
-        pipes.forEach(pipe => {
-            pipe.x -= 2.5;
-
-            ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
-            ctx.fillRect(pipe.x, canvas.height - pipe.bottom, pipe.width, pipe.bottom);
-
-            if (!pipe.passed && pipe.x + pipe.width < bird.x) {
-                score++;
-                pipe.passed = true;
-                const scoreEl = document.getElementById('fbScore');
-                if (scoreEl) scoreEl.innerText = score;
-            }
-
-            if (
-                bird.x + bird.radius > pipe.x && 
-                bird.x - bird.radius < pipe.x + pipe.width && 
-                (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
-            ) {
-                isGameOver = true;
-            }
-        });
-
-        pipes = pipes.filter(p => p.x + p.width > 0);
-
-        if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
-            isGameOver = true;
-        }
-
-        if (isGameOver) {
-            clearInterval(fbInterval);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 22px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('ИГРА ОКОНЧЕНА', canvas.width / 2, canvas.height / 2 - 15);
-            ctx.font = '14px sans-serif';
-            ctx.fillText('Тапни, чтобы начать заново', canvas.width / 2, canvas.height / 2 + 20);
-        }
-
-        frameCount++;
-    }, 1000 / 60);
-}
-
-function stopFlappyBird() {
-    if (fbInterval) {
-        clearInterval(fbInterval);
-        fbInterval = null;
-    }
-}
-
-
-// ==========================================
-// 5. СКРИМЕР КОНЯ
-// ==========================================
+// 3. СКРИМЕР КОНЯ (ПАСХАЛКА)
 document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector('.header');
     if (header) {
