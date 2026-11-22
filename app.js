@@ -1,17 +1,25 @@
-let tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
+let tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+if (tg) {
+    tg.expand();
+    tg.ready();
+}
+
+function triggerHaptic(type = 'light') {
+    if (tg && tg.HapticFeedback) {
+        try { tg.HapticFeedback.impactOccurred(type); } catch (e) {}
+    }
+}
 
 // 1. ТЕМА
 function applyTheme(isLight) {
     if (isLight) {
         document.body.classList.add('light-theme');
-        if (tg.setHeaderColor) tg.setHeaderColor('#ffffff');
-        if (tg.setBackgroundColor) tg.setBackgroundColor('#ffffff');
+        if (tg && tg.setHeaderColor) tg.setHeaderColor('#ffffff');
+        if (tg && tg.setBackgroundColor) tg.setBackgroundColor('#ffffff');
     } else {
         document.body.classList.remove('light-theme');
-        if (tg.setHeaderColor) tg.setHeaderColor('#000000');
-        if (tg.setBackgroundColor) tg.setBackgroundColor('#000000');
+        if (tg && tg.setHeaderColor) tg.setHeaderColor('#000000');
+        if (tg && tg.setBackgroundColor) tg.setBackgroundColor('#000000');
     }
 }
 
@@ -22,11 +30,84 @@ function toggleTheme() {
     localStorage.setItem('onemarket_theme', isLight ? 'light' : 'dark');
 }
 
-const savedTheme = localStorage.getItem('onemarket_theme');
-applyTheme(savedTheme === 'light');
+applyTheme(localStorage.getItem('onemarket_theme') === 'light');
 
 
-// 2. ДАННЫЕ И КАТАЛОГ МАГАЗИНА
+// 2. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+function switchTab(tabName) {
+    triggerHaptic();
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const activeBtn = document.getElementById('nav-' + tabName);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    const shopContent = document.getElementById('shop-content');
+    const rouletteContent = document.getElementById('roulette-content');
+
+    if (tabName === 'shop') {
+        shopContent.style.display = 'block';
+        rouletteContent.style.display = 'none';
+        renderProducts();
+    } else if (tabName === 'roulette') {
+        shopContent.style.display = 'none';
+        rouletteContent.style.display = 'block';
+    }
+}
+
+
+// 3. ЛОГИКА КОЛЕСА ФОРТУНЫ
+let currentRotation = 0;
+let isSpinning = false;
+
+// Сектора по 60 градусов (по часовой стрелке от 0 до 360)
+const sectors = [
+    { label: 'Скидка 10% 🎉', win: true },   // 0 - 60 deg
+    { label: 'Пусто 😔', win: false },       // 60 - 120 deg
+    { label: '15 Звёзд ⭐️', win: true },     // 120 - 180 deg
+    { label: 'Пусто 😔', win: false },       // 180 - 240 deg
+    { label: 'Скидка 25% 🔥', win: true },   // 240 - 300 deg
+    { label: 'Пусто 😔', win: false }        // 300 - 360 deg
+];
+
+function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+    triggerHaptic('medium');
+
+    const wheel = document.getElementById('fortuneWheel');
+    const spinBtn = document.getElementById('spinBtn');
+    const resultText = document.getElementById('wheelResult');
+
+    spinBtn.disabled = true;
+    resultText.innerText = 'Крутим...';
+
+    // Случайный угол (от 5 до 8 полных оборотов + случайный сектор)
+    const extraSpins = (Math.floor(Math.random() * 4) + 5) * 360;
+    const randomDegree = Math.floor(Math.random() * 360);
+    currentRotation += extraSpins + randomDegree;
+
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    setTimeout(() => {
+        isSpinning = false;
+        spinBtn.disabled = false;
+
+        // Вычисляем, какой сектор оказался наверху под стрелкой
+        const normalizedDeg = (360 - (currentRotation % 360)) % 360;
+        const sectorIndex = Math.floor(normalizedDeg / 60);
+        const prize = sectors[sectorIndex];
+
+        resultText.innerText = `Результат: ${prize.label}`;
+        if (prize.win) {
+            triggerHaptic('heavy');
+            if (tg && tg.showAlert) {
+                tg.showAlert(`Поздравляем! Вы выиграли: ${prize.label}`);
+            }
+        }
+    }, 4100); // Длительность совпадает с transition в CSS (4s)
+}
+
+
+// 4. КАТАЛОГ МАГАЗИНА
 const products = [
     { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
     { id: 'stars_75', name: '75 Звёзд ⭐️', price: 27, type: 'stars' },
@@ -49,12 +130,6 @@ const products = [
 let cart = {};
 let currentCategory = 'all';
 
-function triggerHaptic() {
-    if (tg.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('light');
-    }
-}
-
 function filterCategory(category, btnElement) {
     triggerHaptic();
     currentCategory = category;
@@ -68,16 +143,12 @@ function handleSearch() {
 }
 
 function renderProducts() {
-    const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    const searchInput = document.getElementById('searchInput');
+    const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     const premContainer = document.getElementById('premium-grid');
     const starsContainer = document.getElementById('stars-grid');
     const steamContainer = document.getElementById('steam-grid');
-
-    const premSection = document.getElementById('premium-section');
-    const starsSection = document.getElementById('stars-section');
-    const steamSection = document.getElementById('steam-section');
-    const noResults = document.getElementById('no-results');
 
     if (!premContainer) return;
 
@@ -106,20 +177,16 @@ function renderProducts() {
         }
     });
 
-    premSection.style.display = premCount > 0 ? 'block' : 'none';
-    starsSection.style.display = starsCount > 0 ? 'block' : 'none';
-    steamSection.style.display = steamCount > 0 ? 'block' : 'none';
-    noResults.style.display = (premCount === 0 && starsCount === 0 && steamCount === 0) ? 'block' : 'none';
+    document.getElementById('premium-section').style.display = (premCount > 0) ? 'block' : 'none';
+    document.getElementById('stars-section').style.display = (starsCount > 0) ? 'block' : 'none';
+    document.getElementById('steam-section').style.display = (steamCount > 0) ? 'block' : 'none';
+    document.getElementById('no-results').style.display = (premCount === 0 && starsCount === 0 && steamCount === 0) ? 'block' : 'none';
 }
 
 function addToCart(id) {
     triggerHaptic();
-    if (cart[id]) {
-        cart[id].count += 1;
-    } else {
-        const product = products.find(p => p.id === id);
-        cart[id] = { ...product, count: 1 };
-    }
+    if (cart[id]) cart[id].count += 1;
+    else cart[id] = { ...products.find(p => p.id === id), count: 1 };
     updateCartUI();
 }
 
@@ -139,7 +206,6 @@ function updateCartUI() {
 
     cartContainer.innerHTML = '';
     const items = Object.values(cart);
-
     cartSection.style.display = items.length > 0 ? 'block' : 'none';
 
     items.forEach(item => {
@@ -172,19 +238,21 @@ if (checkoutBtn) {
         triggerHaptic();
         const items = Object.values(cart);
         if (items.length === 0) {
-            tg.showAlert("Ваша корзина пуста!");
+            if (tg && tg.showAlert) tg.showAlert("Ваша корзина пуста!");
             return;
         }
         let totalPrice = items.reduce((sum, item) => sum + item.price * item.count, 0);
-        tg.sendData(JSON.stringify({
-            items: items.map(i => ({ name: i.name, count: i.count, price: i.price })),
-            totalPrice: totalPrice
-        }));
+        if (tg) {
+            tg.sendData(JSON.stringify({
+                items: items.map(i => ({ name: i.name, count: i.count, price: i.price })),
+                totalPrice: totalPrice
+            }));
+        }
     });
 }
 
 
-// 3. СКРИМЕР КОНЯ (ПАСХАЛКА)
+// 5. СКРИМЕР КОНЯ
 document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector('.header');
     if (header) {
@@ -201,17 +269,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const modal = document.createElement('div');
         modal.id = "screamerModal";
-        modal.style.cssText = "display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;";
+        modal.style.cssText = "display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100000; justify-content: center; align-items: center;";
         modal.innerHTML = `
-            <img src="IMAGE 2026-11-21 23:09:51.jpg" style="max-width: 90%; max-height: 90%; border-radius: 12px;">
+            <img src="horse.jpg" onerror="this.src='IMAGE 2026-11-21 23:09:51.jpg'" style="max-width: 90%; max-height: 90%; border-radius: 12px;">
         `;
         document.body.appendChild(modal);
 
         screamerBtn.addEventListener('click', () => {
-            triggerHaptic();
+            triggerHaptic('heavy');
             modal.style.display = 'flex';
             audio.currentTime = 0;
-            audio.play().catch(err => console.log("Звук заблокирован:", err));
+            audio.play().catch(() => {});
             setTimeout(() => { modal.style.display = 'none'; }, 3500);
         });
 
