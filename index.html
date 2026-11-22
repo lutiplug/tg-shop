@@ -45,7 +45,7 @@
             color: var(--text-color);
             margin: 0;
             padding: 16px;
-            padding-bottom: 150px;
+            padding-bottom: 160px; /* Большой отступ снизу, чтобы контент не перекрывался */
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
@@ -234,9 +234,10 @@
             cursor: pointer;
         }
 
+        /* Корзина поднята выше, чтобы не перекрывать нижнюю навигацию */
         .cart-bar {
             position: fixed;
-            bottom: 84px;
+            bottom: 90px;
             left: 16px;
             right: 16px;
             background: var(--card-bg);
@@ -246,8 +247,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 40;
         }
 
         .btn-checkout {
@@ -268,7 +269,7 @@
             font-size: 14px;
         }
 
-        /* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (LIQUID GLASS) */
+        /* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (LIQUID GLASS) — ПОВЕРХ ВСЕГО */
         .bottom-nav {
             position: fixed;
             bottom: 12px;
@@ -335,7 +336,7 @@
 
     <!-- ВКЛАДКА 1: МАГАЗИН -->
     <div id="shop-content">
-        <div class="header" id="mainHeader">
+        <div class="header">
             <h2>OneMarket</h2>
             <p>Магазин цифровых товаров</p>
             <button class="btn-add" style="width: 100%; margin-top: 10px;" onclick="triggerScreamer()">🎁 Получить секретную скидку</button>
@@ -478,10 +479,14 @@
         }
 
         function renderProducts() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            
             const premContainer = document.getElementById('premium-grid');
             const starsContainer = document.getElementById('stars-grid');
             const steamContainer = document.getElementById('steam-grid');
+
+            if (!premContainer) return;
 
             premContainer.innerHTML = '';
             starsContainer.innerHTML = '';
@@ -490,7 +495,10 @@
             let premCount = 0, starsCount = 0, steamCount = 0;
 
             products.forEach(p => {
-                if ((currentCategory === 'all' || p.type === currentCategory) && p.name.toLowerCase().includes(searchQuery)) {
+                const matchesCategory = (currentCategory === 'all' || p.type === currentCategory);
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery);
+
+                if (matchesCategory && matchesSearch) {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
@@ -504,9 +512,9 @@
                 }
             });
 
-            document.getElementById('premium-section').style.display = premCount > 0 ? 'block' : 'none';
-            document.getElementById('stars-section').style.display = starsCount > 0 ? 'block' : 'none';
-            document.getElementById('steam-section').style.display = steamCount > 0 ? 'block' : 'none';
+            document.getElementById('premium-section').style.display = (premCount > 0 && (currentCategory === 'all' || currentCategory === 'premium')) ? 'block' : 'none';
+            document.getElementById('stars-section').style.display = (starsCount > 0 && (currentCategory === 'all' || currentCategory === 'stars')) ? 'block' : 'none';
+            document.getElementById('steam-section').style.display = (steamCount > 0 && (currentCategory === 'all' || currentCategory === 'steam')) ? 'block' : 'none';
             document.getElementById('no-results').style.display = (premCount === 0 && starsCount === 0 && steamCount === 0) ? 'block' : 'none';
         }
 
@@ -538,13 +546,9 @@
                 cartContainer.innerHTML += `
                     <div class="cart-item-row">
                         <div>
-                            <strong style="font-size:13px;">${item.name}</strong>
-                            <div style="font-size:11px; color:var(--hint-color);">${item.price} ₽ × ${item.count}</div>
-                        </div>
-                        <div class="counter-control">
-                            <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
-                            <span style="font-weight:700; font-size:13px;">${item.count}</span>
-                            <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+                            <str
+
+    
  
             
      
