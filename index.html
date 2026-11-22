@@ -19,7 +19,6 @@
             --toggle-thumb: #2c2c2e;
         }
 
-        /* Светлая тема */
         body.light-theme {
             --bg-color: #ffffff;
             --text-color: #000000;
@@ -45,11 +44,10 @@
             color: var(--text-color);
             margin: 0;
             padding: 16px;
-            padding-bottom: 110px; /* Отступ снизу для панели навигации */
+            padding-bottom: 110px;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* Переключатель темы (день/ночь) */
         .theme-switch-wrapper {
             display: flex;
             justify-content: flex-end;
@@ -125,7 +123,6 @@
             color: var(--hint-color);
         }
 
-        /* Поле поиска */
         .search-container {
             margin-bottom: 14px;
         }
@@ -146,7 +143,6 @@
             color: var(--hint-color);
         }
 
-        /* Вкладки категорий */
         .tabs-container {
             display: flex;
             gap: 8px;
@@ -240,7 +236,6 @@
             opacity: 0.8;
         }
 
-        /* Корзина */
         .cart-items-list {
             margin-top: 24px;
             background: var(--card-bg);
@@ -288,7 +283,7 @@
 
         .cart-bar {
             position: fixed;
-            bottom: 85px; /* Чуть выше нижней панели навигации */
+            bottom: 85px;
             left: 16px;
             right: 16px;
             background: var(--card-bg);
@@ -327,7 +322,6 @@
             font-size: 14px;
         }
 
-        /* Нижняя панель навигации в стиле iOS Liquid Glass */
         .bottom-nav {
             position: fixed;
             bottom: 12px;
@@ -377,7 +371,6 @@
 </head>
 <body>
 
-    <!-- Переключатель темы -->
     <div class="theme-switch-wrapper">
         <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
             <div class="toggle-thumb"></div>
@@ -395,19 +388,16 @@
         </div>
     </div>
 
-    <!-- Основной контент магазина -->
     <div id="shop-content">
         <div class="header">
             <h2>OneMarket</h2>
             <p>Магазин цифровых товаров</p>
         </div>
 
-        <!-- Поиск -->
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="handleSearch()">
         </div>
 
-        <!-- Вкладки категорий -->
         <div class="tabs-container">
             <button class="tab-btn active" onclick="filterCategory('all', this)">Все товары</button>
             <button class="tab-btn" onclick="filterCategory('premium', this)">👑 Premium</button>
@@ -415,7 +405,6 @@
             <button class="tab-btn" onclick="filterCategory('steam', this)">🎮 Steam</button>
         </div>
 
-        <!-- Сетки товаров -->
         <div id="premium-section">
             <div class="section-title">👑 Telegram Premium</div>
             <div class="grid" id="premium-grid"></div>
@@ -433,7 +422,6 @@
 
         <div id="no-results" class="empty-search" style="display: none;">Товары не найдены 🔍</div>
 
-        <!-- Корзина -->
         <div id="cart-section" class="cart-items-list" style="display:none;">
             <div style="font-size: 15px; font-weight:700; margin-bottom: 10px;">🛒 Выбранные товары:</div>
             <div id="cart-items-container"></div>
@@ -448,16 +436,13 @@
         </div>
     </div>
 
-    <!-- Вкладка Игр (Flappy Bird) -->
     <div id="games-content" style="display: none;"></div>
 
-    <!-- Вкладка Лудки -->
     <div id="roulette-content" style="display: none; text-align: center; padding-top: 30px;">
         <h3>🎰 Колесо удачи</h3>
         <p style="color: var(--hint-color); font-size: 13px;">Скоро здесь появится рулетка!</p>
     </div>
 
-    <!-- Нижняя панель навигации (Liquid Glass) -->
     <div class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('shop', this)">
             <span>🛍</span>
