@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OneMarket Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -36,6 +36,7 @@
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -44,7 +45,7 @@
             color: var(--text-color);
             margin: 0;
             padding: 16px;
-            padding-bottom: 110px;
+            padding-bottom: 150px;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
@@ -66,7 +67,6 @@
             padding: 4px;
             cursor: pointer;
             border: 1px solid var(--border-color);
-            transition: background 0.25s ease, border-color 0.25s ease;
         }
 
         .toggle-thumb {
@@ -77,7 +77,7 @@
             height: 30px;
             background: var(--toggle-thumb);
             border-radius: 999px;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
         }
 
@@ -94,16 +94,10 @@
             align-items: center;
             justify-content: center;
             color: var(--hint-color);
-            transition: color 0.25s ease;
         }
 
-        body:not(.light-theme) .icon-moon {
-            color: #ffffff;
-        }
-
-        body.light-theme .icon-sun {
-            color: #000000;
-        }
+        body:not(.light-theme) .icon-moon { color: #ffffff; }
+        body.light-theme .icon-sun { color: #000000; }
 
         .header {
             text-align: center;
@@ -114,7 +108,6 @@
             margin: 0;
             font-size: 26px;
             font-weight: 800;
-            letter-spacing: 0.5px;
         }
 
         .header p {
@@ -123,9 +116,7 @@
             color: var(--hint-color);
         }
 
-        .search-container {
-            margin-bottom: 14px;
-        }
+        .search-container { margin-bottom: 14px; }
 
         .search-input {
             width: 100%;
@@ -136,11 +127,6 @@
             color: var(--text-color);
             font-size: 14px;
             outline: none;
-            transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-        }
-
-        .search-input::placeholder {
-            color: var(--hint-color);
         }
 
         .tabs-container {
@@ -151,10 +137,7 @@
             padding-bottom: 4px;
             scrollbar-width: none;
         }
-
-        .tabs-container::-webkit-scrollbar {
-            display: none;
-        }
+        .tabs-container::-webkit-scrollbar { display: none; }
 
         .tab-btn {
             background: var(--card-bg);
@@ -166,7 +149,6 @@
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
         .tab-btn.active {
@@ -181,7 +163,6 @@
             margin: 20px 0 12px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
-            letter-spacing: 0.3px;
         }
 
         .grid {
@@ -199,26 +180,10 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.15s ease, border-color 0.15s ease, background 0.25s ease;
         }
 
-        .card:active {
-            transform: scale(0.96);
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 6px;
-            line-height: 1.3;
-        }
-
-        .card-price {
-            color: var(--hint-color);
-            font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 12px;
-        }
+        .card-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+        .card-price { color: var(--hint-color); font-weight: 700; font-size: 15px; margin-bottom: 12px; }
 
         .btn-add {
             background: var(--btn-color);
@@ -229,11 +194,6 @@
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            transition: opacity 0.2s ease, background 0.25s ease, color 0.25s ease;
-        }
-
-        .btn-add:active {
-            opacity: 0.8;
         }
 
         .cart-items-list {
@@ -251,10 +211,7 @@
             padding: 10px 0;
             border-bottom: 1px solid var(--border-color);
         }
-
-        .cart-item-row:last-child {
-            border-bottom: none;
-        }
+        .cart-item-row:last-child { border-bottom: none; }
 
         .counter-control {
             display: flex;
@@ -274,16 +231,12 @@
             height: 26px;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
         }
 
         .cart-bar {
             position: fixed;
-            bottom: 85px;
+            bottom: 84px;
             left: 16px;
             right: 16px;
             background: var(--card-bg);
@@ -294,8 +247,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            z-index: 90;
-            transition: background 0.25s ease, border-color 0.25s ease;
+            z-index: 50;
         }
 
         .btn-checkout {
@@ -307,12 +259,6 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: transform 0.15s ease, opacity 0.2s ease, background 0.25s ease, color 0.25s ease;
-        }
-
-        .btn-checkout:active {
-            transform: scale(0.95);
-            opacity: 0.9;
         }
 
         .empty-search {
@@ -322,31 +268,33 @@
             font-size: 14px;
         }
 
+        /* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (LIQUID GLASS) */
         .bottom-nav {
             position: fixed;
             bottom: 12px;
             left: 16px;
             right: 16px;
-            height: 60px;
-            background: rgba(20, 20, 22, 0.8);
+            height: 62px;
+            background: rgba(25, 25, 28, 0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 100;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 99999;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            pointer-events: auto;
         }
 
         body.light-theme .bottom-nav {
-            background: rgba(244, 244, 245, 0.85);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(244, 244, 245, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.12);
         }
 
         .nav-item {
-            background: none;
+            background: transparent;
             border: none;
             color: var(--hint-color);
             font-size: 11px;
@@ -354,19 +302,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 2px;
             cursor: pointer;
-            transition: color 0.2s ease;
+            height: 100%;
             flex: 1;
+            padding: 0;
         }
 
-        .nav-item span:first-child {
-            font-size: 18px;
-        }
-
-        .nav-item.active {
-            color: var(--text-color);
-        }
+        .nav-item span:first-child { font-size: 20px; }
+        .nav-item.active { color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -375,7 +320,7 @@
         <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
             <div class="toggle-thumb"></div>
             <div class="toggle-icon icon-sun">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
                 </svg>
@@ -388,14 +333,16 @@
         </div>
     </div>
 
+    <!-- ВКЛАДКА 1: МАГАЗИН -->
     <div id="shop-content">
-        <div class="header">
+        <div class="header" id="mainHeader">
             <h2>OneMarket</h2>
             <p>Магазин цифровых товаров</p>
+            <button class="btn-add" style="width: 100%; margin-top: 10px;" onclick="triggerScreamer()">🎁 Получить секретную скидку</button>
         </div>
 
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="handleSearch()">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="renderProducts()">
         </div>
 
         <div class="tabs-container">
@@ -432,32 +379,172 @@
                 <div style="font-size: 12px; color: var(--hint-color);" id="total-count">Товаров: 0</div>
                 <div style="font-size: 18px; font-weight: 800;" id="total-price">0 ₽</div>
             </div>
-            <button class="btn-checkout" id="checkoutBtn">Оформить</button>
+            <button class="btn-checkout" onclick="checkoutOrder()">Оформить</button>
         </div>
     </div>
 
+    <!-- ВКЛАДКА 2: ИГРЫ -->
     <div id="games-content" style="display: none;"></div>
 
-    <div id="roulette-content" style="display: none; text-align: center; padding-top: 30px;">
+    <!-- ВКЛАДКА 3: ЛУДКА -->
+    <div id="roulette-content" style="display: none; text-align: center; padding-top: 40px;">
         <h3>🎰 Колесо удачи</h3>
         <p style="color: var(--hint-color); font-size: 13px;">Скоро здесь появится рулетка!</p>
     </div>
 
+    <!-- НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('shop', this)">
+        <button type="button" class="nav-item active" id="nav-shop" onclick="switchTab('shop')">
             <span>🛍</span>
             <span>Магазин</span>
         </button>
-        <button class="nav-item" onclick="switchTab('games', this)">
+        <button type="button" class="nav-item" id="nav-games" onclick="switchTab('games')">
             <span>🎮</span>
             <span>Игры</span>
         </button>
-        <button class="nav-item" onclick="switchTab('roulette', this)">
+        <button type="button" class="nav-item" id="nav-roulette" onclick="switchTab('roulette')">
             <span>🎰</span>
             <span>Лудка</span>
         </button>
     </div>
 
-    <script src="app.js"></script>
-</body>
-</html>
+    <!-- СКРИМЕР -->
+    <audio id="horseAudio" src="mixkit-scared-horse-neighing-85.wav" preload="auto"></audio>
+    <div id="screamerModal" onclick="this.style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100000; justify-content: center; align-items: center;">
+        <img src="horse.jpg" onerror="this.src='IMAGE 2026-11-21 23:09:51.jpg'" style="max-width: 90%; max-height: 90%; border-radius: 12px;">
+    </div>
+
+    <script>
+        const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+
+        function triggerHaptic() {
+            if (tg && tg.HapticFeedback) {
+                try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
+            }
+        }
+
+        // 1. ТЕМА
+        function applyTheme(isLight) {
+            if (isLight) {
+                document.body.classList.add('light-theme');
+                if (tg && tg.setHeaderColor) tg.setHeaderColor('#ffffff');
+                if (tg && tg.setBackgroundColor) tg.setBackgroundColor('#ffffff');
+            } else {
+                document.body.classList.remove('light-theme');
+                if (tg && tg.setHeaderColor) tg.setHeaderColor('#000000');
+                if (tg && tg.setBackgroundColor) tg.setBackgroundColor('#000000');
+            }
+        }
+
+        function toggleTheme() {
+            triggerHaptic();
+            const isLight = !document.body.classList.contains('light-theme');
+            applyTheme(isLight);
+            localStorage.setItem('onemarket_theme', isLight ? 'light' : 'dark');
+        }
+        applyTheme(localStorage.getItem('onemarket_theme') === 'light');
+
+        // 2. МАГАЗИН
+        const products = [
+            { id: 'stars_50', name: '50 Звёзд ⭐️', price: 18, type: 'stars' },
+            { id: 'stars_75', name: '75 Звёзд ⭐️', price: 27, type: 'stars' },
+            { id: 'stars_100', name: '100 Звёзд ⭐️', price: 35, type: 'stars' },
+            { id: 'stars_150', name: '150 Звёзд ⭐️', price: 52, type: 'stars' },
+            { id: 'stars_250', name: '250 Звёзд ⭐️', price: 87, type: 'stars' },
+            { id: 'stars_300', name: '300 Звёзд ⭐️', price: 104, type: 'stars' },
+            { id: 'stars_500', name: '500 Звёзд ⭐️', price: 165, type: 'stars' },
+            { id: 'prem_1', name: 'Premium 1 мес. (с заходом)', price: 75, type: 'premium' },
+            { id: 'prem_3', name: 'Premium 3 мес.', price: 230, type: 'premium' },
+            { id: 'prem_6', name: 'Premium 6 мес.', price: 320, type: 'premium' },
+            { id: 'prem_12', name: 'Premium 12 мес.', price: 500, type: 'premium' },
+            { id: 'steam_1', name: 'Пополнение Steam $1', price: 21, type: 'steam' },
+            { id: 'steam_5', name: 'Пополнение Steam $5', price: 100, type: 'steam' },
+            { id: 'steam_10', name: 'Пополнение Steam $10', price: 190, type: 'steam' },
+        ];
+
+        let cart = {};
+        let currentCategory = 'all';
+
+        function filterCategory(category, btnElement) {
+            triggerHaptic();
+            currentCategory = category;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const premContainer = document.getElementById('premium-grid');
+            const starsContainer = document.getElementById('stars-grid');
+            const steamContainer = document.getElementById('steam-grid');
+
+            premContainer.innerHTML = '';
+            starsContainer.innerHTML = '';
+            steamContainer.innerHTML = '';
+
+            let premCount = 0, starsCount = 0, steamCount = 0;
+
+            products.forEach(p => {
+                if ((currentCategory === 'all' || p.type === currentCategory) && p.name.toLowerCase().includes(searchQuery)) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-title">${p.name}</div>
+                        <div class="card-price">${p.price} ₽</div>
+                        <button class="btn-add" onclick="addToCart('${p.id}')">В корзину</button>
+                    `;
+                    if (p.type === 'premium') { premContainer.appendChild(card); premCount++; }
+                    else if (p.type === 'stars') { starsContainer.appendChild(card); starsCount++; }
+                    else if (p.type === 'steam') { steamContainer.appendChild(card); steamCount++; }
+                }
+            });
+
+            document.getElementById('premium-section').style.display = premCount > 0 ? 'block' : 'none';
+            document.getElementById('stars-section').style.display = starsCount > 0 ? 'block' : 'none';
+            document.getElementById('steam-section').style.display = steamCount > 0 ? 'block' : 'none';
+            document.getElementById('no-results').style.display = (premCount === 0 && starsCount === 0 && steamCount === 0) ? 'block' : 'none';
+        }
+
+        function addToCart(id) {
+            triggerHaptic();
+            if (cart[id]) cart[id].count += 1;
+            else cart[id] = { ...products.find(p => p.id === id), count: 1 };
+            updateCartUI();
+        }
+
+        function changeQty(id, delta) {
+            triggerHaptic();
+            if (!cart[id]) return;
+            cart[id].count += delta;
+            if (cart[id].count <= 0) delete cart[id];
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            let totalPrice = 0, totalCount = 0;
+            const items = Object.values(cart);
+            document.getElementById('cart-section').style.display = items.length > 0 ? 'block' : 'none';
+            const cartContainer = document.getElementById('cart-items-container');
+            cartContainer.innerHTML = '';
+
+            items.forEach(item => {
+                totalPrice += item.price * item.count;
+                totalCount += item.count;
+                cartContainer.innerHTML += `
+                    <div class="cart-item-row">
+                        <div>
+                            <strong style="font-size:13px;">${item.name}</strong>
+                            <div style="font-size:11px; color:var(--hint-color);">${item.price} ₽ × ${item.count}</div>
+                        </div>
+                        <div class="counter-control">
+                            <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
+                            <span style="font-weight:700; font-size:13px;">${item.count}</span>
+                            <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+ 
+            
+     
