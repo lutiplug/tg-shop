@@ -253,4 +253,128 @@ function startFlappyBird() {
     function addPipe() {
         let gap = 120;
         let topHeight = Math.floor(Math.random() * (canvas.height - gap - 120)) + 40;
-        pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap, width: 50
+        pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap, width: 50, passed: false });
+    }
+
+    canvas.addEventListener('click', () => {
+        triggerHaptic();
+        if (isGameOver) {
+            bird = { x: 50, y: 150, gravity: 0.5, lift: -8, velocity: 0, radius: 14 };
+            pipes = [];
+            score = 0;
+            isGameOver = false;
+        } else {
+            bird.velocity = bird.lift;
+        }
+    });
+
+    let frameCount = 0;
+    fbInterval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
+
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (frameCount % 90 === 0) {
+            addPipe();
+        }
+
+        ctx.fillStyle = '#22c55e';
+        pipes.forEach(pipe => {
+            pipe.x -= 2.5;
+
+            ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
+            ctx.fillRect(pipe.x, canvas.height - pipe.bottom, pipe.width, pipe.bottom);
+
+            if (!pipe.passed && pipe.x + pipe.width < bird.x) {
+                score++;
+                pipe.passed = true;
+                const scoreEl = document.getElementById('fbScore');
+                if (scoreEl) scoreEl.innerText = score;
+            }
+
+            if (
+                bird.x + bird.radius > pipe.x && 
+                bird.x - bird.radius < pipe.x + pipe.width && 
+                (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
+            ) {
+                isGameOver = true;
+            }
+        });
+
+        pipes = pipes.filter(p => p.x + p.width > 0);
+
+        if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
+            isGameOver = true;
+        }
+
+        if (isGameOver) {
+            clearInterval(fbInterval);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('ИГРА ОКОНЧЕНА', canvas.width / 2, canvas.height / 2 - 15);
+            ctx.font = '14px sans-serif';
+            ctx.fillText('Тапни, чтобы начать заново', canvas.width / 2, canvas.height / 2 + 20);
+        }
+
+        frameCount++;
+    }, 1000 / 60);
+}
+
+function stopFlappyBird() {
+    if (fbInterval) {
+        clearInterval(fbInterval);
+        fbInterval = null;
+    }
+}
+
+
+// ==========================================
+// 5. СКРИМЕР КОНЯ
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const header = document.querySelector('.header');
+    if (header) {
+        const screamerBtn = document.createElement('button');
+        screamerBtn.innerHTML = "🎁 Получить секретную скидку";
+        screamerBtn.className = "btn-add";
+        screamerBtn.style.cssText = "width: 100%; margin-top: 10px;";
+        header.appendChild(screamerBtn);
+
+        const audio = document.createElement('audio');
+        audio.id = "horseAudio";
+        audio.src = "mixkit-scared-horse-neighing-85.wav";
+        document.body.appendChild(audio);
+
+        const modal = document.createElement('div');
+        modal.id = "screamerModal";
+        modal.style.cssText = "display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;";
+        modal.innerHTML = `
+            <img src="IMAGE 2026-11-21 23:09:51.jpg" style="max-width: 90%; max-height: 90%; border-radius: 12px;">
+        `;
+        document.body.appendChild(modal);
+
+        screamerBtn.addEventListener('click', () => {
+            triggerHaptic();
+            modal.style.display = 'flex';
+            audio.currentTime = 0;
+            audio.play().catch(err => console.log("Звук заблокирован:", err));
+            setTimeout(() => { modal.style.display = 'none'; }, 3500);
+        });
+
+        modal.addEventListener('click', () => { modal.style.display = 'none'; });
+    }
+
+    renderProducts();
+});
