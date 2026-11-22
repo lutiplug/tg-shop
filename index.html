@@ -1,517 +1,653 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>OneMarket Shop</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-color: #000000;
-            --text-color: #ffffff;
-            --hint-color: #888888;
-            --btn-color: #ffffff;
-            --btn-text: #000000;
-            --card-bg: #111111;
-            --border-color: #222222;
-            --input-bg: #111111;
-            --toggle-bg: #1c1c1e;
-            --toggle-thumb: #2c2c2e;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>OneMarket Shop</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        body.light-theme {
-            --bg-color: #ffffff;
-            --text-color: #000000;
-            --hint-color: #666666;
-            --btn-color: #000000;
-            --btn-text: #ffffff;
-            --card-bg: #f4f4f5;
-            --border-color: #e4e4e7;
-            --input-bg: #f4f4f5;
-            --toggle-bg: #e4e4e7;
-            --toggle-thumb: #ffffff;
-        }
+<style>
+:root {
+    --bg-color: #000;
+    --text-color: #fff;
+    --hint-color: #888;
+    --btn-color: #fff;
+    --btn-text: #000;
+    --card-bg: #111;
+    --border-color: #222;
+    --input-bg: #111;
+    --toggle-bg: #1c1c1e;
+    --toggle-thumb: #2c2c2e;
+}
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+body.light-theme {
+    --bg-color: #fff;
+    --text-color: #000;
+    --hint-color: #666;
+    --btn-color: #000;
+    --btn-text: #fff;
+    --card-bg: #f4f4f5;
+    --border-color: #e4e4e7;
+    --input-bg: #f4f4f5;
+    --toggle-bg: #e4e4e7;
+    --toggle-thumb: #fff;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 16px;
-            padding-bottom: 160px;
-            transition: background-color 0.25s ease, color 0.25s ease;
-        }
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        /* Переключатель темы */
-        .theme-switch-wrapper {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 8px;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 16px;
+    padding-bottom: 160px;
+    transition: background-color .25s ease, color .25s ease;
+}
 
-        .theme-toggle {
-            position: relative;
-            width: 76px;
-            height: 38px;
-            background: var(--toggle-bg);
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px;
-            cursor: pointer;
-            border: 1px solid var(--border-color);
-        }
+/* ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ */
+.theme-switch-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
 
-        .toggle-thumb {
-            position: absolute;
-            top: 3px;
-            left: 39px;
-            width: 32px;
-            height: 30px;
-            background: var(--toggle-thumb);
-            border-radius: 999px;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
-        }
+.theme-toggle {
+    position: relative;
+    width: 76px;
+    height: 38px;
+    background: var(--toggle-bg);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
 
-        body.light-theme .toggle-thumb { transform: translateX(-35px); }
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 39px;
+    width: 32px;
+    height: 30px;
+    background: var(--toggle-thumb);
+    border-radius: 999px;
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 2px 5px rgba(0,0,0,.25);
+}
 
-        .toggle-icon {
-            position: relative;
-            z-index: 1;
-            width: 32px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--hint-color);
-        }
+body.light-theme .toggle-thumb {
+    transform: translateX(-35px);
+}
 
-        body:not(.light-theme) .icon-moon { color: #ffffff; }
-        body.light-theme .icon-sun { color: #000000; }
+.toggle-icon {
+    position: relative;
+    z-index: 1;
+    width: 32px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--hint-color);
+}
 
-        /* Шапка и магазин */
-        .header { text-align: center; margin-bottom: 16px; }
-        .header h2 { margin: 0; font-size: 26px; font-weight: 800; }
-        .header p { margin: 4px 0 0; font-size: 13px; color: var(--hint-color); }
+body:not(.light-theme) .icon-moon { color: #fff; }
+body.light-theme .icon-sun { color: #000; }
 
-        .search-container { margin-bottom: 14px; }
-        .search-input {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px 14px;
-            color: var(--text-color);
-            font-size: 14px;
-            outline: none;
-        }
+/* ШАПКА */
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+}
 
-        .tabs-container {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            padding-bottom: 4px;
-            scrollbar-width: none;
-        }
-        .tabs-container::-webkit-scrollbar { display: none; }
+.header h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+}
 
-        .tab-btn {
-            background: var(--card-bg);
-            color: var(--hint-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-        }
+.header p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--hint-color);
+}
 
-        .tab-btn.active {
-            background: var(--btn-color);
-            color: var(--btn-text);
-            border-color: var(--btn-color);
-        }
+.search-container { margin-bottom: 14px; }
 
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin: 20px 0 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-        }
+.search-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+}
 
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.tabs-container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 14px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+.tabs-container::-webkit-scrollbar { display: none; }
 
-        .card-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
-        .card-price { color: var(--hint-color); font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+.tab-btn {
+    background: var(--card-bg);
+    color: var(--hint-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
 
-        .btn-add {
-            background: var(--btn-color);
-            color: var(--btn-text);
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-        }
+.tab-btn.active {
+    background: var(--btn-color);
+    color: var(--btn-text);
+    border-color: var(--btn-color);
+}
 
-        /* Корзина */
-        .cart-items-list {
-            margin-top: 24px;
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-        }
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 12px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+}
 
-        .cart-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .cart-item-row:last-child { border-bottom: none; }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
 
-        .counter-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--bg-color);
-            padding: 4px 8px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-        .btn-qty {
-            background: var(--btn-color);
-            color: var(--btn-text);
-            border: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-        }
+.card-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
 
-        .cart-bar {
-            position: fixed;
-            bottom: 88px;
-            left: 16px;
-            right: 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            z-index: 40;
-        }
+.card-price {
+    color: var(--hint-color);
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
 
-        .btn-checkout {
-            background: var(--btn-color);
-            color: var(--btn-text);
-            border: none;
-            padding: 12px 22px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-        }
+.btn-add {
+    background: var(--btn-color);
+    color: var(--btn-text);
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
 
-        .empty-search { text-align: center; color: var(--hint-color); padding: 20px 0; font-size: 14px; }
+/* КОРЗИНА */
+.cart-items-list {
+    margin-top: 24px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+}
 
-        /* КОЛЕСО ФОРТУНЫ */
-        .wheel-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 10px;
-        }
+.cart-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
 
-        .wheel-wrapper {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 20px auto;
-        }
+.cart-item-row:last-child { border-bottom: none; }
 
-        .wheel-pointer {
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 24px solid #ef4444;
-            z-index: 10;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
+.counter-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-color);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
 
-        .wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 6px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: conic-gradient(
-                #3b82f6 0deg 60deg,
-                #1f2937 60deg 120deg,
-                #eab308 120deg 180deg,
-                #1f2937 180deg 240deg,
-                #22c55e 240deg 300deg,
-                #1f2937 300deg 360deg
-            );
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
+.btn-qty {
+    background: var(--btn-color);
+    color: var(--btn-text);
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
-        .wheel-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 48px;
-            height: 48px;
-            background: var(--bg-color);
-            border: 4px solid var(--border-color);
-            border-radius: 50%;
-            z-index: 5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
+.cart-bar {
+    position: fixed;
+    bottom: 88px;
+    left: 16px;
+    right: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    z-index: 40;
+}
 
-        .wheel-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-origin: 0 0;
-            font-size: 12px;
-            font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-            white-space: nowrap;
-        }
+.btn-checkout {
+    background: var(--btn-color);
+    color: var(--btn-text);
+    border: none;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
 
-        .wheel-legend {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 300px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
+.empty-search {
+    text-align: center;
+    color: var(--hint-color);
+    padding: 20px 0;
+    font-size: 14px;
+}
 
-        .legend-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 10px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+/* КОЛЕСО ФОРТУНЫ */
+.wheel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
 
-        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.wheel-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 20px auto;
+}
 
-        .btn-spin {
-            background: var(--btn-color);
-            color: var(--btn-text);
-            border: none;
-            padding: 14px 36px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+.wheel-pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 24px solid #ef4444;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+}
 
-        .btn-spin:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 6px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    transition: transform 4s cubic-bezier(.17,.67,.12,.99);
+    background: conic-gradient(
+        #3b82f6 0deg 60deg,
+        #1f2937 60deg 120deg,
+        #eab308 120deg 180deg,
+        #1f2937 180deg 240deg,
+        #22c55e 240deg 300deg,
+        #1f2937 300deg 360deg
+    );
+    box-shadow: 0 10px 30px rgba(0,0,0,.5);
+}
 
-        /* Нижняя навигация */
-        .bottom-nav {
-            position: fixed;
-            bottom: 12px;
-            left: 16px;
-            right: 16px;
-            height: 62px;
-            background: rgba(25, 25, 28, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 22px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 99999;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-        }
+.wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 48px;
+    height: 48px;
+    background: var(--bg-color);
+    border: 4px solid var(--border-color);
+    border-radius: 50%;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
 
-        body.light-theme .bottom-nav {
-            background: rgba(244, 244, 245, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-        }
+.wheel-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: 0 0;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,.8);
+    white-space: nowrap;
+}
 
-        .nav-item {
-            background: transparent;
-            border: none;
-            color: var(--hint-color);
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            cursor: pointer;
-            height: 100%;
-            flex: 1;
-        }
+.wheel-legend {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+}
 
-        .nav-item span:first-child { font-size: 20px; }
-        .nav-item.active { color: var(--text-color); }
-    </style>
+.legend-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.btn-spin {
+    background: var(--btn-color);
+    color: var(--btn-text);
+    border: none;
+    padding: 14px 36px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,.2);
+}
+
+.btn-spin:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   APPLE LIQUID GLASS — НИЖНЯЯ НАВИГАЦИЯ
+   ========================================= */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 12px;
+    left: 16px;
+    right: 16px;
+    height: 66px;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    background: rgba(255,255,255,.075);
+
+    -webkit-backdrop-filter: blur(32px) saturate(190%);
+    backdrop-filter: blur(32px) saturate(190%);
+
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 24px;
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.38),
+        inset 0 1px 1px rgba(255,255,255,.32),
+        inset 0 -1px 1px rgba(255,255,255,.08);
+
+    z-index: 99999;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+/* Блики на поверхности */
+.bottom-nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,.20) 0%,
+        rgba(255,255,255,.055) 35%,
+        transparent 62%,
+        rgba(255,255,255,.07) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Световая линия сверху */
+.bottom-nav::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.75),
+        transparent
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Светлая тема */
+body.light-theme .bottom-nav {
+    background: rgba(255,255,255,.48);
+    border-color: rgba(255,255,255,.78);
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.12),
+        inset 0 1px 1px rgba(255,255,255,.95),
+        inset 0 -1px 1px rgba(255,255,255,.35);
+}
+
+body.light-theme .bottom-nav::before {
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,.72),
+        rgba(255,255,255,.12) 55%,
+        rgba(255,255,255,.32)
+    );
+}
+
+.nav-item {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    border: none;
+    color: var(--hint-color);
+    font-size: 12px;
+    font-weight: 600;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+
+    cursor: pointer;
+    height: 100%;
+    flex: 1;
+
+    transition: color .25s ease, transform .2s ease;
+}
+
+.nav-item span:first-child {
+    font-size: 21px;
+    line-height: 1.1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
+}
+
+.nav-item.active {
+    color: var(--text-color);
+}
+
+.nav-item:active {
+    transform: scale(.92);
+}
+
+/* Запасной фон для браузеров без blur */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-nav {
+        background: rgba(35,35,38,.96);
+    }
+
+    body.light-theme .bottom-nav {
+        background: rgba(245,245,247,.97);
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <div class="theme-switch-wrapper">
-        <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
-            <div class="toggle-thumb"></div>
-            <div class="toggle-icon icon-sun">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-                </svg>
-            </div>
-            <div class="toggle-icon icon-moon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </div>
+<div class="theme-switch-wrapper">
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <div class="toggle-thumb"></div>
+        <div class="toggle-icon icon-sun">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+        </div>
+        <div class="toggle-icon icon-moon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
         </div>
     </div>
+</div>
 
-    <!-- ВКЛАДКА 1: МАГАЗИН -->
-    <div id="shop-content">
-        <div class="header" id="mainHeader">
-            <h2>OneMarket</h2>
-            <p>Магазин цифровых товаров</p>
-        </div>
-
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="handleSearch()">
-        </div>
-
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="filterCategory('all', this)">Все товары</button>
-            <button class="tab-btn" onclick="filterCategory('premium', this)">👑 Premium</button>
-            <button class="tab-btn" onclick="filterCategory('stars', this)">⭐️ Stars</button>
-            <button class="tab-btn" onclick="filterCategory('steam', this)">🎮 Steam</button>
-        </div>
-
-        <div id="premium-section">
-            <div class="section-title">👑 Telegram Premium</div>
-            <div class="grid" id="premium-grid"></div>
-        </div>
-
-        <div id="stars-section">
-            <div class="section-title">⭐️ Telegram Stars</div>
-            <div class="grid" id="stars-grid"></div>
-        </div>
-
-        <div id="steam-section">
-            <div class="section-title">🎮 Пополнение Steam</div>
-            <div class="grid" id="steam-grid"></div>
-        </div>
-
-        <div id="no-results" class="empty-search" style="display: none;">Товары не найдены 🔍</div>
-
-        <div id="cart-section" class="cart-items-list" style="display:none;">
-            <div style="font-size: 15px; font-weight:700; margin-bottom: 10px;">🛒 Выбранные товары:</div>
-            <div id="cart-items-container"></div>
-        </div>
-
-        <div class="cart-bar">
-            <div>
-                <div style="font-size: 12px; color: var(--hint-color);" id="total-count">Товаров: 0</div>
-                <div style="font-size: 18px; font-weight: 800;" id="total-price">0 ₽</div>
-            </div>
-            <button class="btn-checkout" id="checkoutBtn">Оформить</button>
-        </div>
+<!-- МАГАЗИН -->
+<div id="shop-content">
+    <div class="header" id="mainHeader">
+        <h2>OneMarket</h2>
+        <p>Магазин цифровых товаров</p>
     </div>
 
-    <!-- ВКЛАДКА 2: КОЛЕСО ФОРТУНЫ -->
-    <div id="roulette-content" style="display: none;">
-        <div class="wheel-container">
-            <h2 style="margin: 0 0 4px;">🎰 Колесо удачи</h2>
-            <p style="margin: 0; font-size: 13px; color: var(--hint-color);">Испытай удачу и выиграй бонус!</p>
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти товар..." oninput="handleSearch()">
+    </div>
 
-            <div class="wheel-wrapper">
-                <div class="wheel-pointer"></div>
-                <div class="wheel" id="fortuneWheel">
-                    <div class="wheel-center">🎲</div>
-                </div>
-            </div>
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="filterCategory('all', this)">Все товары</button>
+        <button class="tab-btn" onclick="filterCategory('premium', this)">👑 Premium</button>
+        <button class="tab-btn" onclick="filterCategory('stars', this)">⭐️ Stars</button>
+        <button class="tab-btn" onclick="filterCategory('steam', this)">🎮 Steam</button>
+    </div>
 
-            <div class="wheel-legend">
-                <div class="legend-item"><span class="dot" style="background: #3b82f6;"></span> Скидка 10%</div>
-                <div class="legend-item"><span class="dot" style="background: #eab308;"></span> 15 Звёзд ⭐️</div>
-                <div class="legend-item"><span class="dot" style="background: #22c55e;"></span> Скидка 25%</div>
-                <div class="legend-item"><span class="dot" style="background: #1f2937;"></span> Пусто</div>
-            </div>
+    <div id="premium-section">
+        <div class="section-title">👑 Telegram Premium</div>
+        <div class="grid" id="premium-grid"></div>
+    </div>
 
-            <button class="btn-spin" id="spinBtn" onclick="spinWheel()">Крутить колесо</button>
-            <p id="wheelResult" style="margin-top: 14px; font-weight: 700; font-size: 15px; min-height: 22px;"></p>
+    <div id="stars-section">
+        <div class="section-title">⭐️ Telegram Stars</div>
+        <div class="grid" id="stars-grid"></div>
+    </div>
+
+    <div id="steam-section">
+        <div class="section-title">🎮 Пополнение Steam</div>
+        <div class="grid" id="steam-grid"></div>
+    </div>
+
+    <div id="no-results" class="empty-search" style="display:none;">Товары не найдены 🔍</div>
+
+    <div id="cart-section" class="cart-items-list" style="display:none;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:10px;">🛒 Выбранные товары:</div>
+        <div id="cart-items-container"></div>
+    </div>
+
+    <div class="cart-bar">
+        <div>
+            <div style="font-size:12px;color:var(--hint-color);" id="total-count">Товаров: 0</div>
+            <div style="font-size:18px;font-weight:800;" id="total-price">0 ₽</div>
         </div>
+        <button class="btn-checkout" id="checkoutBtn">Оформить</button>
     </div>
+</div>
 
-    <!-- НИЖНЕЕ МЕНЮ -->
-    <div class="bottom-nav">
-        <button type="button" class="nav-item active" id="nav-shop" onclick="switchTab('shop')">
-            <span>🛍</span>
-            <span>Магазин</span>
-        </button>
-        <button type="button" class="nav-item" id="nav-roulette" onclick="switchTab('roulette')">
-            <span>🎰</span>
-            <span>Колесо</span>
-        </button>
+<!-- КОЛЕСО ФОРТУНЫ -->
+<div id="roulette-content" style="display:none;">
+    <div class="wheel-container">
+        <h2 style="margin:0 0 4px;">🎰 Колесо удачи</h2>
+        <p style="margin:0;font-size:13px;color:var(--hint-color);">Испытай удачу и выиграй бонус!</p>
+
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="fortuneWheel">
+                <div class="wheel-center">🎲</div>
+            </div>
+        </div>
+
+        <div class="wheel-legend">
+            <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Скидка 10%</div>
+            <div class="legend-item"><span class="dot" style="background:#eab308;"></span> 15 Звёзд ⭐️</div>
+            <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Скидка 25%</div>
+            <div class="legend-item"><span class="dot" style="background:#1f2937;"></span> Пусто</div>
+        </div>
+
+        <button class="btn-spin" id="spinBtn" onclick="spinWheel()">Крутить колесо</button>
+        <p id="wheelResult" style="margin-top:14px;font-weight:700;font-size:15px;min-height:22px;"></p>
     </div>
+</div>
 
-    <script src="app.js?v=10"></script>
+<!-- НИЖНЕЕ МЕНЮ -->
+<div class="bottom-nav">
+    <button type="button" class="nav-item active" id="nav-shop" onclick="switchTab('shop')">
+        <span>🛍</span>
+        <span>Магазин</span>
+    </button>
+
+    <button type="button" class="nav-item" id="nav-roulette" onclick="switchTab('roulette')">
+        <span>🎰</span>
+        <span>Колесо</span>
+    </button>
+</div>
+
+<script src="app.js?v=10"></script>
 </body>
 </html>
